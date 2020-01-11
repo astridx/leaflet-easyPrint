@@ -3,6 +3,9 @@ var fileSaver = require('file-saver');
 var jsPDF = require('jspdf');
 L.Control.EasyPrint = L.Control.extend({
 	options: {
+		menueintrag: "Einstellungen",
+		ueberschrift: "Geoportal Einstellungen",
+		text: "text",
 		title: 'Print map',
 		position: 'topleft',
 		sizeModes: ['Current'],
@@ -21,7 +24,13 @@ L.Control.EasyPrint = L.Control.extend({
 			A4Portrait: 'A4 Portrait'
 		}
 	},
-	onAdd: function () {
+	onAdd: function (map) {
+		var controlElementTag = "div";
+		var controlElementClass = "leaflet-control-settings";
+		var controlElement = L.DomUtil.create(
+			controlElementTag,
+			controlElementClass
+			);
 		this.mapContainer = this._map.getContainer();
 		this.options.sizeModes = this.options.sizeModes.map(function (sizeMode) {
 			if (sizeMode === 'Current') {
@@ -49,7 +58,15 @@ L.Control.EasyPrint = L.Control.extend({
 			;
 			return sizeMode;
 		}, this);
-		var container = L.DomUtil.create('div', 'leaflet-control-easyPrint leaflet-bar leaflet-control');
+		var container = L.DomUtil.create('div', 'leaflet-control-easyPrint');
+
+		var title = L.DomUtil.create("h3", "", container);
+		title.innerHTML = this.options.menueintrag;
+		var div = L.DomUtil.create("div", "", container);
+		div.innerHTML = this.options.text;
+
+		L.DomUtil.create("hr", "", container);
+
 		var wrapper = L.DomUtil.create('div', 'leaflet-control-easyPrint-wrapper', container);
 		if (!this.options.hidden) {
 
@@ -66,10 +83,6 @@ L.Control.EasyPrint = L.Control.extend({
 			this.desc.id = "desc-easyprint"
 			this.desc.value = this.options.desc;
 
-			this.show = L.DomUtil.create('input', 'leaflet-control-easyPrint-textarea', wrapper);
-			this.show.type = "checkbox";
-			this.show.id = "show-easyprint";
-
 			this.link = L.DomUtil.create('a', btnClass, wrapper);
 			this.link.id = "leafletEasyPrint";
 			this.link.title = this.options.title;
@@ -82,7 +95,15 @@ L.Control.EasyPrint = L.Control.extend({
 			}, this);
 			L.DomEvent.disableClickPropagation(container);
 		}
-		return container;
+
+		map.sidebar.addTab({
+			label: this.options.menueintrag,
+			className: "settings",
+			content: container
+		});
+
+		map.sidebar.rebuild();
+		return controlElement;
 	},
 	printMap: function (event, filename) {
 		if (filename) {
@@ -306,10 +327,6 @@ L.Control.EasyPrint = L.Control.extend({
 			holderStyle.display = 'block';
 			linkStyle.borderTopRightRadius = '0'
 			linkStyle.borderBottomRightRadius = '0'
-		} else {
-			holderStyle.display = 'none';
-			linkStyle.borderTopRightRadius = '2px'
-			linkStyle.borderBottomRightRadius = '2px'
 		}
 	},
 	_toggleControls: function (show) {

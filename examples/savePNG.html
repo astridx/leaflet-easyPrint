@@ -53,9 +53,21 @@
 	mymap.on('click', onMapClick);
 	
 	L.easyPrint({
-		title: 'My awesome print button',
+		title: 'Print map',
+		position: 'topleft',
+		sizeModes: ['A4Portrait', 'A4Landscape'],
+		filename: 'map',
 		exportOnly: true,
-		position: 'bottomright',
+		hidden: false,
+		tileWait: 2000,
+		hideControlContainer: true,
+		hideClasses: [],
+		customWindowTitle: window.document.title,
+		defaultSizeTitles: {
+			Current: 'Current Size',
+			A4Landscape: 'A4 Landscape',
+			A4Portrait: 'A4 Portrait'
+		},
 		sizeModes: ['A4Portrait', 'A4Landscape']
 	}).addTo(mymap);	
 

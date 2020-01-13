@@ -19,6 +19,7 @@ L.Control.EasyPrint = L.Control.extend({
 		heading: "Überschrift",
 		desc: "Am wichtigsten ist zunächst einmal eine Grund-Idee zu haben. So hat doch jeder bereits zu Beginn eine ungefähre Vorstellung, wie sein Garten später aussehen soll. Damit Sie letztendlich mit dem Ergebnis zufrieden sind und der ganze Garten später ein stimmiges Bild ergibt, sollten Sie sich zunächst überlegen, ob Sie einen bestimmten Gartenstil oder ein bestimmtes Farbkonzept bevorzugen. Stimmige Kombinationen von Pflanzen, baulichen Elementen, Möbeln und Accessoires sind gefragt, damit sich die Einzelteile zu einem gelungenen Gesamtbild zusammenfügen.",
 		customWindowTitle: window.document.title,
+		showborders: "Show borders",
 		defaultSizeTitles: {
 			Current: 'Current Size',
 			A4Landscape: 'A4 Landscape',
@@ -98,7 +99,7 @@ L.Control.EasyPrint = L.Control.extend({
 			L.DomUtil.create('hr', 'easyPrintSpacer', container);
 
 			var showborders = L.DomUtil.create('a', 'easyPrintShowBorder', container);
-			showborders.innerHTML = "Show Borders";
+			showborders.innerHTML = this.options.showborders;
 			L.DomEvent.addListener(showborders, 'click', this.showBorders, this);
 
 			L.DomEvent.disableClickPropagation(container);

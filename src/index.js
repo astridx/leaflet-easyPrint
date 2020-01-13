@@ -112,8 +112,8 @@ L.Control.EasyPrint = L.Control.extend({
 		});
 
 		map.sidebar.rebuild();
-		//return controlElement;
-		return container;
+		return controlElement;
+		//return container;
 	},
 
 	showBorders: function () {

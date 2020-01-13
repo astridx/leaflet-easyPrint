@@ -8,12 +8,13 @@ L.Control.EasyPrint = L.Control.extend({
 		text: "text",
 		title: 'Print map',
 		position: 'topleft',
-		sizeModes: ['Current'],
+		showbordertime: 3000,
+		sizeModes: ['A4Portrait', 'A4Landscape'],
 		filename: 'map',
 		exportOnly: false,
 		hidden: false,
 		tileWait: 500,
-		hideControlContainer: true,
+		hideControlContainer: false,
 		hideClasses: [],
 		heading: "Überschrift",
 		desc: "Am wichtigsten ist zunächst einmal eine Grund-Idee zu haben. So hat doch jeder bereits zu Beginn eine ungefähre Vorstellung, wie sein Garten später aussehen soll. Damit Sie letztendlich mit dem Ergebnis zufrieden sind und der ganze Garten später ein stimmiges Bild ergibt, sollten Sie sich zunächst überlegen, ob Sie einen bestimmten Gartenstil oder ein bestimmtes Farbkonzept bevorzugen. Stimmige Kombinationen von Pflanzen, baulichen Elementen, Möbeln und Accessoires sind gefragt, damit sich die Einzelteile zu einem gelungenen Gesamtbild zusammenfügen.",
@@ -88,11 +89,18 @@ L.Control.EasyPrint = L.Control.extend({
 			this.link.title = this.options.title;
 			this.holder = L.DomUtil.create('ul', 'easyPrintHolder', container);
 			this.options.sizeModes.forEach(function (sizeMode) {
-				var btn = L.DomUtil.create('li', 'easyPrintSizeMode', this.holder);
+				var btn = L.DomUtil.create('li', sizeMode.className, this.holder);
 				btn.title = sizeMode.name;
 				var link = L.DomUtil.create('a', sizeMode.className, btn);
 				L.DomEvent.addListener(btn, 'click', this.printMap, this);
 			}, this);
+
+			L.DomUtil.create('hr', 'easyPrintSpacer', container);
+
+			var showborders = L.DomUtil.create('a', 'easyPrintShowBorder', container);
+			showborders.innerHTML = "Show Borders";
+			L.DomEvent.addListener(showborders, 'click', this.showBorders, this);
+
 			L.DomEvent.disableClickPropagation(container);
 		}
 
@@ -103,7 +111,55 @@ L.Control.EasyPrint = L.Control.extend({
 		});
 
 		map.sidebar.rebuild();
-		return controlElement;
+		//return controlElement;
+		return container;
+	},
+
+	showBorders: function () {
+		var size = this._map.getSize();
+		var latlon_center = this._map.getCenter();
+
+		var point_center = this._map.latLngToLayerPoint(latlon_center);
+
+		// Querformat
+
+		var qx1 = point_center.x - (842 / 2);
+		var qx2 = point_center.x + (842 / 2);
+		var qy1 = point_center.y - (595 / 2);
+		var qy2 = point_center.y + (595 / 2);
+
+		var qlinksoben = L.point(qx1, qy1);
+		var qrechtsunten = L.point(qx2, qy2);
+
+		var qlatlon_linksoben = this._map.layerPointToLatLng(qlinksoben);
+		var qlatlon_rechtsunten = this._map.layerPointToLatLng(qrechtsunten);
+
+		var qboundsrec = [qlatlon_linksoben, qlatlon_rechtsunten];
+		var qbordersrectemp = L.rectangle(qboundsrec, {color: "#ff7800", weight: 1, className: 'qbordersrectemp'}).addTo(this._map);
+
+		// Hochformat
+
+		var hx1 = point_center.x - (595 / 2);
+		var hx2 = point_center.x + (595 / 2);
+		var hy1 = point_center.y - (842 / 2);
+		var hy2 = point_center.y + (842 / 2);
+
+		var hlinksoben = L.point(hx1, hy1);
+		var hrechtsunten = L.point(hx2, hy2);
+
+		var hlatlon_linksoben = this._map.layerPointToLatLng(hlinksoben);
+		var hlatlon_rechtsunten = this._map.layerPointToLatLng(hrechtsunten);
+
+		var hboundsrec = [hlatlon_linksoben, hlatlon_rechtsunten];
+		var hbordersrectemp = L.rectangle(hboundsrec, {color: "#ff7800", weight: 1, className: 'hbordersrectemp'}).addTo(this._map);
+
+		var thismap = this._map;
+		var showbordertime = this.options.showbordertime;
+
+		setTimeout(function deleteMarker() {
+			thismap.removeLayer(qbordersrectemp);
+			thismap.removeLayer(hbordersrectemp);
+		}, showbordertime);
 	},
 	printMap: function (event, filename) {
 		if (filename) {
@@ -194,7 +250,7 @@ L.Control.EasyPrint = L.Control.extend({
 		}
 	},
 	_pausePrint: function (sizeMode) {
-		var plugin = this
+		var plugin = this;
 		var loadingTest = setInterval(function () {
 			//if (!plugin.options.tileLayer.isLoading()) {
 			clearInterval(loadingTest);
@@ -338,9 +394,12 @@ L.Control.EasyPrint = L.Control.extend({
 	_toggleClasses: function (classes, show) {
 		classes.forEach(function (className) {
 			var div = document.getElementsByClassName(className)[0];
-			if (show)
-				return div.style.display = 'block';
-			div.style.display = 'none';
+			if (div) {
+				if (show)
+					return div.style.display = 'block';
+				div.style.display = 'none';
+			}
+			console.log('No class ' + className);
 		});
 	},
 	_a4PageSize: {
